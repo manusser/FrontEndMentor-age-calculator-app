@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- displays site properly based on user's device -->
+
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="./assets/images/favicon-32x32.png"
+		/>
+
+		<title>Frontend Mentor | Age calculator app</title>
+
+		<link rel="stylesheet" href="./styles/style.css" />
+	</head>
+	<body>
+		<div class="calculator">
+			<div class="form_calculator">
+				<div>
+					<label for="days" id="dayLabel">DAY</label>
+					<input type="text" id="day" placeholder="DD" />
+					<p class="error-message" id="dayOfBirthError"></p>
+				</div>
+				<div>
+					<label for="month" id="monthLabel">MONTH</label>
+					<input type="text" id="month" placeholder="MM" />
+					<p class="error-message" id="monthOfBirthError"></p>
+				</div>
+				<div>
+					<label for="year" id="yearLabel">YEAR</label>
+					<input type="text" id="year" placeholder="YYYY" />
+					<p class="error-message" id="yearOfBirthError"></p>
+				</div>
+			</div>
+
+			<div class="button_container">
+				<div class="line"></div>
+				<button class="calculate_button" id="calculateButton">
+					<img src="./assets/images/icon-arrow.svg" alt="" />
+				</button>
+			</div>
+
+			<div class="number-list-container">
+				<ul class="number-list">
+					<li><span id="years">--</span> years</li>
+					<li><span id="months">--</span> months</li>
+					<li><span id="days">--</span> days</li>
+				</ul>
+			</div>
+		</div>
+
+		<script>
+			/* Day, month and year input elements */
+			const dayInput = document.getElementById("day");
+			const monthInput = document.getElementById("month");
+			const yearInput = document.getElementById("year");
+			const calculateButton = document.getElementById("calculateButton");
+
+			/* Labels */
+			const dayLabel = document.getElementById("dayLabel");
+			const monthLabel = document.getElementById("monthLabel");
+			const yearLabel = document.getElementById("yearLabel");
+
+			/* Result elements */
+			const days = document.getElementById("days");
+			const months = document.getElementById("months");
+			const years = document.getElementById("years");
+
+			/* Error elements for each input */
+			const errorElements = {
+				day: document.getElementById("dayOfBirthError"),
+				month: document.getElementById("monthOfBirthError"),
+				year: document.getElementById("yearOfBirthError"),
+			};
+
+			function calculateAge() {
+				const dayOfBirth = parseInt(dayInput.value);
+				const monthOfBirth = parseInt(monthInput.value);
+				const yearOfBirth = parseInt(yearInput.value);
+
+				const currentDate = new Date();
+				const currentDay = currentDate.getDate();
+				const currentMonth = currentDate.getMonth() + 1;
+				const currentYear = currentDate.getFullYear();
+
+				resetErrors();
+
+				if (isNaN(dayOfBirth) || dayOfBirth < 1 || dayOfBirth > 31) {
+					showError(errorElements.day, "Must be a valid day");
+					addErrorStyles(dayInput, dayLabel);
+				}
+
+				if (isNaN(monthOfBirth) || monthOfBirth < 1 || monthOfBirth > 12) {
+					showError(errorElements.month, "Must be a valid month");
+					addErrorStyles(monthInput, monthLabel);
+				}
+
+				if (
+					isNaN(yearOfBirth) ||
+					yearOfBirth > currentYear ||
+					yearOfBirth < 1900
+				) {
+					showError(errorElements.year, "Must be a valid year");
+					addErrorStyles(yearInput, yearLabel);
+				}
+
+				if (hasErrors()) {
+					throw new Error("Invalid input");
+				}
+
+				let ageYears = currentYear - yearOfBirth;
+				let ageMonths = currentMonth - monthOfBirth;
+				let ageDays = currentDay - dayOfBirth;
+
+				if (ageDays < 0) {
+					ageMonths--;
+					const lastDayOfPreviousMonth = new Date(
+						currentYear,
+						currentMonth - 1,
+						0
+					).getDate();
+					ageDays += lastDayOfPreviousMonth;
+				}
+
+				if (ageMonths < 0) {
+					ageYears--;
+					ageMonths += 12;
+				}
+
+				return {
+					years: ageYears,
+					months: ageMonths,
+					days: ageDays,
+				};
+			}
+
+			function resetErrors() {
+				for (const errorElement of Object.values(errorElements)) {
+					errorElement.textContent = "";
+				}
+				resetErrorStyles(dayInput, dayLabel);
+				resetErrorStyles(monthInput, monthLabel);
+				resetErrorStyles(yearInput, yearLabel);
+			}
+
+			function showError(element, message) {
+				element.textContent = message;
+			}
+
+			function addErrorStyles(inputElement, labelElement) {
+				inputElement.classList.add("input-error");
+				labelElement.classList.add("text-error");
+			}
+
+			function resetErrorStyles(inputElement, labelElement) {
+				inputElement.classList.remove("input-error");
+				labelElement.classList.remove("text-error");
+			}
+
+			function hasErrors() {
+				return Object.values(errorElements).some(
+					(errorElement) => errorElement.textContent !== ""
+				);
+			}
+
+			calculateButton.addEventListener("click", (e) => {
+				try {
+					const edad = calculateAge(
+						dayInput.value,
+						monthInput.value,
+						yearInput.value
+					);
+
+					years.innerHTML = edad.years;
+					months.innerHTML = edad.months;
+					days.innerHTML = edad.days;
+				} catch (error) {
+					console.log(error.message);
+				}
+			});
+		</script>
+	</body>
+</html>
